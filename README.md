@@ -229,6 +229,15 @@ Then you can use the cardano-node and cardano-cli commands inside container.
 ### Flow of the Containerfile
 ![Flow](https://github.com/ayushgml/cardano-toolchain/assets/72748253/c03d7914-675f-4b1e-a150-7d23d2d29c46)
 
+
+### Continuous Integration
+I added Github Actions to the repository to build the image and push it to Docker Hub whenever a push/PR is made to the main branch. The workflow file is located at .github/workflows/docker-image.yml
+
+### Docker Hub
+The image is available on Docker Hub at [https://hub.docker.com/repository/docker/ayushgml/cardano-toolchain/general](https://hub.docker.com/repository/docker/ayushgml/cardano-toolchain/general)
+
+
+
 <!-- CONTACT -->
 ## Contact
 
