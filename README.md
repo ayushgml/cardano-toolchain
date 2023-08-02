@@ -240,6 +240,13 @@ The image is available on Docker Hub at [https://hub.docker.com/repository/docke
 ### K8s Deployment config files
 I have also added the k8s deployment and service YAML files in the ```k8s-deployment-and-service-configs``` branch. Make sure to check it out!
 
+
+### Difficulties I faced
+ - 1st difficulty was to choose the right dependencies. Then after checking the GHCup, Haskell, libsodium and Cabal documentation, I was able to figure out the dependencies.
+ - 2nd was to get the right version of cabal, GHC and libsodium. I had to try different versions of cabal, GHC and libsodium to get the right combination of versions that worked.
+ - 3rd was to get the stable version of cardano-node. here I got stuck for a few hours. Then I had to check the github thouroughly and then I found the tags section where I browsed and tried the stable versions of cardano-node by using some of them one-by-one. Finally the stable verison 1.26.0 worked.
+ - 4th was to decrease the size of the final image. I had to use multi stage build to reduce the size of the final image to overcome that. Otherwise the final image would have been around 9GB. But now it is around 600MB.
+
 <!-- CONTACT -->
 ## Contact
 
