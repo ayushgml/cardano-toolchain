@@ -222,6 +222,13 @@ docker run -it ayushgml/cardano-toolchain
 
 Then you can use the cardano-node and cardano-cli commands inside container.
 
+
+### Dependency Hierarchy
+<img src="images/Dependencies.png"/>
+
+### Flow of the Containerfile
+<img src="images/Flow.png"/>
+
 <!-- CONTACT -->
 ## Contact
 
