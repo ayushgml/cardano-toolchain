@@ -224,10 +224,10 @@ Then you can use the cardano-node and cardano-cli commands inside container.
 
 
 ### Dependency Hierarchy
-<img src="images/Dependencies.png"/>
+![Dependencies](https://github.com/ayushgml/cardano-toolchain/assets/72748253/b42aa73b-854a-4cf9-b73d-c5cb6421f513)
 
 ### Flow of the Containerfile
-<img src="images/Flow.png"/>
+![Flow](https://github.com/ayushgml/cardano-toolchain/assets/72748253/c03d7914-675f-4b1e-a150-7d23d2d29c46)
 
 <!-- CONTACT -->
 ## Contact
