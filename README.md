@@ -237,6 +237,8 @@ I added Github Actions to the repository to build the image and push it to Docke
 The image is available on Docker Hub at [https://hub.docker.com/repository/docker/ayushgml/cardano-toolchain/general](https://hub.docker.com/repository/docker/ayushgml/cardano-toolchain/general)
 
 
+### K8s Deployment config files
+I have also added the k8s deployment and service YAML files in the ```k8s-deployment-and-service-configs``` branch. Make sure to check it out!
 
 <!-- CONTACT -->
 ## Contact
