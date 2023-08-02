@@ -31,8 +31,11 @@ Read the below section to know the details
 
 <!-- GETTING STARTED -->
 ## Steps to build the containerfile
+#### Setting the base image
 ```FROM debian:stable-slim AS builder``` : This line sets the base image to Debian's stable-slim version. We give it an alias as 'builder' using the "AS" keyword.
 
+
+#### Set environment variables
 ```ENV DEBIAN_FRONTEND noninteractive```
 
 This prevents any interactive prompts during package installations.
@@ -43,6 +46,8 @@ ENV LANG C.UTF-8
 ```
 These lines set the character encoding for the local and system language.
 
+
+#### Install build dependencies
 ```
 RUN apt-get update -y
 ```
@@ -79,6 +84,8 @@ RUN apt-get install -y \
 ```
 Installing build dependencies required for GHC, Cabal, libsodium(dependencies for cardano-node and CLI) and cardano-node
 
+
+#### Install cabal
 ```
 RUN wget https://downloads.haskell.org/~cabal/cabal-install-3.2.0.0/cabal-install-3.2.0.0-x86_64-unknown-linux.tar.xz \
   && tar -xf cabal-install-3.2.0.0-x86_64-unknown-linux.tar.xz \
@@ -88,6 +95,8 @@ RUN wget https://downloads.haskell.org/~cabal/cabal-install-3.2.0.0/cabal-instal
 ```
 Downloading the cabal version 3.2 tar file. Then after extracting the fo;der we remove the downloaded archive. Then we move cabal to /usr/bin/ so that we can run the cabal command then.
 
+
+#### Install GHC
 ```
 RUN wget https://downloads.haskell.org/ghc/8.10.2/ghc-8.10.2-x86_64-deb9-linux.tar.xz \
   && tar -xf ghc-8.10.2-x86_64-deb9-linux.tar.xz \
@@ -99,7 +108,7 @@ RUN wget https://downloads.haskell.org/ghc/8.10.2/ghc-8.10.2-x86_64-deb9-linux.t
 ```
 Downloading GHC (Glasgow Haskell Compiler) version 8.10.2, extracts it, removes the downloaded archive, configures, installs, and sets up GHC.
 
-
+#### Install libsodium
 ```
 RUN git clone https://github.com/input-output-hk/libsodium \
   && cd libsodium \
@@ -121,7 +130,7 @@ ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 ```
 Setting up the environment variable "LD_LIBRARY_PATH" to include the /usr/local/lib directory, allowing the system to find dynamically linked libraries at runtime. Also, the environment variable "PKG_CONFIG_PATH" to include the /usr/local/lib/pkgconfig directory, allowing the system to find pkg-config files for libraries at build time.
 
-
+#### Install cardano-node
 ```
 RUN echo "Building tags/1.26.0..." \
   && echo tags/1.26.0 > /CARDANO_BRANCH \
@@ -147,18 +156,21 @@ RUN mkdir -p /root/.local/bin/ \
 We change the work directory to /cardano-node/ and then we configure cabal to use the GHC version 8.10.2. Then we add the cardano-crypto-praos package to the cabal.project.local file. Then we build the cardano-node and cardano-cli. Then we create a directory /root/.local/bin/ and copy the cardano-node and cardano-cli binaries to the directory. 
 
 
+#### Starting a new build stage
 ```
 FROM debian:stable-slim
 ```
 From here we start a new stage build. We use multi stage build to reduce the size of the final image.(Otherwise the final image will be around 9GB)
 
+
+#### Copy the binaries/libraries we've just built in the builder stage
 ```
 COPY --from=builder /root/.local/bin/cardano-* /usr/local/bin/
 COPY --from=builder /usr/local/lib/libsodium* /usr/local/lib/
 ```
 Copies the binaries and libraries built in the previous "builder" stage to the corresponding locations in the new stage.
 
-
+#### Install tools
 ```
 RUN apt-get update && \
   apt-get install -y \
@@ -178,12 +190,13 @@ RUN apt-get update && \
 ```
 Updating and installing some necessary tools that may be needed when running the final container.
 
+#### Remove uneccesary packages
 ```
 RUN rm -rf /var/lib/apt/lists/*
 ```
 Removing uneccesary libraries and files that we we installed in the builder stage that we dont need anymore. 
 
-
+#### Set the working directory to /app
 ```
 WORKDIR /app
 ```
@@ -201,9 +214,13 @@ docker build -t cardano-toolchain .
 docker run -it cardano-toolchain
 ```
 
+#### Pulling the image from Docker Hub
 
+```
+docker run -it ayushgml/cardano-toolchain
+```
 
-
+Then you can use the cardano-node and cardano-cli commands inside container.
 
 <!-- CONTACT -->
 ## Contact
