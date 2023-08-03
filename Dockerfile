@@ -94,9 +94,10 @@ RUN git clone https://github.com/input-output-hk/cardano-node.git \
   && echo -e "package cardano-crypto-praos\n flags: -external-libsodium-vrf" >>  cabal.project.local \
   && cabal update \
   && cabal build all
-RUN mkdir -p /root/.local/bin/ \
-  && cp -p dist-newstyle/build/x86_64-linux/ghc-8.10.2/cardano-node-8.2.0-pre/x/cardano-node/build/cardano-node/cardano-node /root/.local/bin/ \
-  && cp -p dist-newstyle/build/x86_64-linux/ghc-8.10.2/cardano-cli-8.2.0-pre/x/cardano-cli/build/cardano-cli/cardano-cli /root/.local/bin/
+WORKDIR /cardano-node
+RUN mkdir -p $HOME/.local/bin \
+  && cp -p "$(./scripts/bin-path.sh cardano-node)" $HOME/.local/bin/ \
+  && cp -p "$(./scripts/bin-path.sh cardano-cli)" $HOME/.local/bin/
 
 
 FROM debian:stable-slim
@@ -104,6 +105,7 @@ FROM debian:stable-slim
 # Copy the binaries/libraries we've just built in the builder stage
 COPY --from=builder /root/.local/bin/cardano-* /usr/local/bin/
 COPY --from=builder /usr/local/lib/libsodium* /usr/local/lib/
+COPY --from=builder /usr/local/lib/libsecp256k1* /usr/local/lib/
 
 # Install tools
 RUN apt-get update && \
