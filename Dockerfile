@@ -33,25 +33,29 @@ RUN apt-get install -y \
   libncursesw5 \
   gnupg \
   libtool \
-  autoconf
+  autoconf \
+  curl
 RUN apt-get clean
 
-# Install cabal
-RUN wget https://downloads.haskell.org/~cabal/cabal-install-3.2.0.0/cabal-install-3.2.0.0-x86_64-unknown-linux.tar.xz \
-  && tar -xf cabal-install-3.2.0.0-x86_64-unknown-linux.tar.xz \
-  && rm cabal-install-3.2.0.0-x86_64-unknown-linux.tar.xz cabal.sig \
-  && mv cabal /usr/bin/ \
-  && cabal update
-
-
 # Install GHC
-RUN wget https://downloads.haskell.org/ghc/8.10.2/ghc-8.10.2-x86_64-deb9-linux.tar.xz \
-  && tar -xf ghc-8.10.2-x86_64-deb9-linux.tar.xz \
-  && rm ghc-8.10.2-x86_64-deb9-linux.tar.xz \
-  && cd ghc-8.10.2 \
+RUN wget https://downloads.haskell.org/ghc/8.10.7/ghc-8.10.7-x86_64-deb10-linux.tar.xz \
+  && tar -xf ghc-8.10.7-x86_64-deb10-linux.tar.xz \
+  && rm ghc-8.10.7-x86_64-deb10-linux.tar.xz \
+  && cd ghc-* \
   && ./configure \
   && make install \
   && cd ..
+
+
+# Install cabal
+RUN wget https://downloads.haskell.org/~cabal/cabal-install-3.8.1.0/cabal-install-3.8.1.0-x86_64-linux-deb10.tar.xz
+RUN tar -xf cabal-install-3.8.1.0-x86_64-linux-deb10.tar.xz
+RUN rm cabal-install-3.8.1.0-x86_64-linux-deb10.tar.xz
+RUN mv cabal /usr/bin/
+RUN cabal update
+
+
+
 
 
 # Install libsodium
@@ -59,7 +63,7 @@ RUN git clone https://github.com/input-output-hk/libsodium \
   && cd libsodium \
   && git fetch --all --recurse-submodules --tags \
   && git tag \
-  && echo git checkout 66f017f1 \
+  && echo git checkout dbb48cc \
   && ./autogen.sh \
   && ./configure \
   && make \
@@ -68,22 +72,32 @@ RUN git clone https://github.com/input-output-hk/libsodium \
 ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" 
 ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 
+RUN git clone https://github.com/bitcoin-core/secp256k1 \
+  && cd secp256k1 \
+  && git checkout ac83be33 \
+  && ./autogen.sh \
+  && ./configure --enable-module-schnorrsig --enable-experimental \
+  && make \
+  && make check \
+  && make install
+
 # Install cardano-node
-RUN echo "Building tags/1.26.0..." \
-  && echo tags/1.26.0 > /CARDANO_BRANCH \
-  && git clone https://github.com/input-output-hk/cardano-node.git \
+
+RUN echo "Building tags/8.2.0-pre..." 
+RUN echo tags/8.2.0-pre > /CARDANO_BRANCH 
+RUN git clone https://github.com/input-output-hk/cardano-node.git \
   && cd cardano-node \
   && git fetch --all --recurse-submodules --tags \
   && git tag \
-  && git checkout tags/1.26.0
-WORKDIR /cardano-node/
-RUN cabal configure --with-compiler=ghc-8.10.2 \
-  && echo "package cardano-crypto-praos" >>  cabal.project.local \
-  && echo "  flags: -external-libsodium-vrf" >>  cabal.project.local \
-  && cabal build cardano-node cardano-cli
+  && git checkout 8.2.0-pre \
+  && cabal configure --with-compiler=ghc-8.10.7 \
+  && echo -e "package cardano-crypto-praos\n flags: -external-libsodium-vrf" >>  cabal.project.local \
+  && cabal update \
+  && cabal build all
 RUN mkdir -p /root/.local/bin/ \
-  && cp -p dist-newstyle/build/x86_64-linux/ghc-8.10.2/cardano-node-1.26.0/x/cardano-node/build/cardano-node/cardano-node /root/.local/bin/ \
-  && cp -p dist-newstyle/build/x86_64-linux/ghc-8.10.2/cardano-cli-1.26.0/x/cardano-cli/build/cardano-cli/cardano-cli /root/.local/bin/
+  && cp -p dist-newstyle/build/x86_64-linux/ghc-8.10.2/cardano-node-8.2.0-pre/x/cardano-node/build/cardano-node/cardano-node /root/.local/bin/ \
+  && cp -p dist-newstyle/build/x86_64-linux/ghc-8.10.2/cardano-cli-8.2.0-pre/x/cardano-cli/build/cardano-cli/cardano-cli /root/.local/bin/
+
 
 FROM debian:stable-slim
 
